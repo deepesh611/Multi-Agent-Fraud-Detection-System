@@ -8,20 +8,6 @@
 
 ---
 
-## 📋 Table of Contents
-
-- [Overview](#-overview)
-- [Features](#-features)
-- [System Architecture](#-system-architecture)
-- [Technology Stack](#-technology-stack)
-- [Installation](#-installation)
-- [Usage](#-usage)
-- [Project Structure](#-project-structure)
-- [How It Works](#-how-it-works)
-- [License](#-license)
-
----
-
 ## 🎯 Overview
 
 The **Multi-Agent Fraud Detection System** is a comprehensive solution designed to identify, investigate, and explain fraudulent insurance claims. Built for the Abacus Insights Hackathon, this system combines traditional rule-based detection with modern AI techniques to provide accurate, explainable fraud detection.
