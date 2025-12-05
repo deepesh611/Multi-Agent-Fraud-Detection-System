@@ -1,18 +1,15 @@
 """
-Vector Store using FAISS for Fraud Case Search
-Enables semantic search over fraud cases
+Vector Store using FAISS for Fraud Case Search (local vector db => low latency)
 """
 
-import numpy as np
 import faiss
 import pickle
+import numpy as np
+
 from sentence_transformers import SentenceTransformer
 
 
 class FraudVectorStore:
-    """
-    FAISS-based vector store for semantic search over fraud cases
-    """
     
     def __init__(self, embeddings_path='data/embeddings'):
         self.embeddings_path = embeddings_path
@@ -22,7 +19,6 @@ class FraudVectorStore:
         self.metadata = None
     
     def load_index(self):
-        """Load FAISS index and associated data"""
         # Load embeddings
         embeddings = np.load(f'{self.embeddings_path}/fraud_embeddings.npy')
         
@@ -80,8 +76,7 @@ class FraudVectorStore:
         
         return results
     
-    def get_fraud_statistics(self):
-        """Get statistics about fraud cases in the vector store"""
+    def get_fraud_statistics(self):                         # get statistics about fraud cases in the vector store
         total = len(self.metadata)
         fraud_cases = sum(1 for m in self.metadata if m['fraud_detected'])
         

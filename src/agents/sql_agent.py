@@ -1,30 +1,23 @@
 """
 SQL Query Agent - Converts natural language to SQL queries
-Uses LLM to generate SQL for statistical questions about fraud data
 """
 
+import os
+import sys
 import sqlite3
 import pandas as pd
-import sys
-import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils.llm_client import LLMClient
 
 
 class SQLQueryAgent:
-    """
-    Converts natural language questions to SQL queries
-    Executes them against the fraud detection database
-    """
-    
     def __init__(self, db_path='data/processed/fraud_detection.db'):
         self.db_path = db_path
         self.llm = LLMClient()
         self.schema = self._get_schema()
     
     def _get_schema(self):
-        """Get database schema for context"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
@@ -41,14 +34,13 @@ class SQLQueryAgent:
             
             schema_info.append({
                 'table': table_name,
-                'columns': [(col[1], col[2]) for col in columns]  # (name, type)
+                'columns': [(col[1], col[2]) for col in columns] 
             })
         
         conn.close()
         return schema_info
     
     def question_to_sql(self, question):
-        """Convert natural language question to SQL query"""
         
         # Build schema description for LLM
         schema_text = "DATABASE SCHEMA:\n\n"
@@ -87,8 +79,8 @@ Generate SQL query for the question:"""
         
         return sql_query
     
+    # Convert question to SQL and execute it
     def execute_query(self, question):
-        """Convert question to SQL and execute it"""
         try:
             # Generate SQL query
             sql_query = self.question_to_sql(question)
@@ -120,8 +112,6 @@ if __name__ == "__main__":
     print("\n🔍 Testing SQL Query Agent\n")
     
     agent = SQLQueryAgent()
-    
-    # Test questions
     test_questions = [
         "How many fraud cases are there?",
         "How many fraud cases involve amounts over $50,000?",

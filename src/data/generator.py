@@ -1,6 +1,7 @@
 import random
 import numpy as np
 import pandas as pd
+
 from datetime import datetime, timedelta
 
 class FraudDataGenerator:
@@ -106,21 +107,18 @@ class FraudDataGenerator:
         print(f"✅ Generated {len(df)} base claims")
         return df
     
+    # Select random claims to duplicate and append
     def inject_duplicates(self, df, num=75):
-        """Inject duplicate claim_ids"""
-        # Select random claims to duplicate
         duplicate_indices = random.sample(range(len(df)), num)
         duplicate_rows = df.iloc[duplicate_indices].copy()
         duplicate_rows['is_fraud'] = True
-        
-        # Append duplicates
+
         df = pd.concat([df, duplicate_rows], ignore_index=True)
         print(f"✅ Injected {num} duplicate claims")
         return df
     
+    # Inject claims with abnormally high amounts
     def inject_abnormal_amounts(self, df, num=40):
-        """Inject claims with abnormally high amounts"""
-        # Find non-fraud claims with low amounts
         candidates = df[(df['is_fraud'] == False) & 
                        (df['claim_amount'] < 10000)].index.tolist()
         
@@ -138,8 +136,8 @@ class FraudDataGenerator:
         print(f"✅ Injected {num} abnormal amount claims")
         return df
     
+    # Inject procedure/diagnosis code mismatches
     def inject_code_mismatches(self, df, num=50):
-        """Inject procedure/diagnosis code mismatches"""
         candidates = df[df['is_fraud'] == False].index.tolist()
         
         if len(candidates) < num:
@@ -162,8 +160,8 @@ class FraudDataGenerator:
         print(f"✅ Injected {num} code mismatch claims")
         return df
     
+    # Inject same patient, multiple major surgeries same day
     def inject_impossible_scenarios(self, df, num=25):
-        """Same patient, multiple major surgeries same day"""
         candidates = df[df['is_fraud'] == False].index.tolist()
         
         # We need pairs, so num must be even
@@ -189,30 +187,24 @@ class FraudDataGenerator:
             
             df.at[idx2, 'patient_id'] = patient
             df.at[idx2, 'claim_date'] = date
-            
-            # Both are surgeries
             df.at[idx1, 'procedure_code'] = random.choice(self.surgery_codes)
             df.at[idx2, 'procedure_code'] = random.choice(self.surgery_codes)
-            
             df.at[idx1, 'is_fraud'] = True
             df.at[idx2, 'is_fraud'] = True
         
         print(f"✅ Injected {len(impossible_indices)} impossible scenario claims")
         return df
     
+    # Provider billing 3x average for their specialty
     def inject_provider_outliers(self, df, num=35):
-        """Provider billing 3x average for their specialty"""
-        # Pick a provider to make an outlier
-        outlier_providers = random.sample(df['provider_id'].unique().tolist(), 
-                                         min(5, len(df['provider_id'].unique())))
+        outlier_providers = random.sample(df['provider_id'].unique().tolist(), min(5, len(df['provider_id'].unique())))
         
         injected = 0
         for provider in outlier_providers:
             provider_claims = df[df['provider_id'] == provider].index.tolist()
             
             # Inflate some of their claims
-            claims_to_inflate = random.sample(provider_claims, 
-                                            min(num // 5, len(provider_claims)))
+            claims_to_inflate = random.sample(provider_claims, min(num // 5, len(provider_claims)))
             
             for idx in claims_to_inflate:
                 if df.at[idx, 'is_fraud']:
@@ -233,8 +225,8 @@ class FraudDataGenerator:
         print(f"✅ Injected {injected} provider outlier claims")
         return df
     
+    # Multiple claims for same patient in same week
     def inject_velocity_fraud(self, df, num=25):
-        """Multiple claims for same patient in same week"""
         candidates = df[df['is_fraud'] == False].index.tolist()
         
         if len(candidates) < num:
@@ -263,8 +255,8 @@ class FraudDataGenerator:
         print(f"✅ Injected {len(velocity_indices)} velocity fraud claims")
         return df
     
+    # Main generation function
     def generate(self):
-        """Main generation function"""
         print("\n" + "="*60)
         print("🏥 Generating Fraud Detection Dataset")
         print("="*60)
@@ -273,22 +265,22 @@ class FraudDataGenerator:
         df = self.generate_base_data()
         
         print("\n[2/7] Injecting duplicate claims...")
-        df = self.inject_duplicates(df, num=75)
+        df = self.inject_duplicates(df, num=125)
         
         print("\n[3/7] Injecting abnormal amounts...")
-        df = self.inject_abnormal_amounts(df, num=40)
+        df = self.inject_abnormal_amounts(df, num=80)
         
         print("\n[4/7] Injecting code mismatches...")
-        df = self.inject_code_mismatches(df, num=50)
+        df = self.inject_code_mismatches(df, num=80)
         
         print("\n[5/7] Injecting impossible scenarios...")
-        df = self.inject_impossible_scenarios(df, num=24)
+        df = self.inject_impossible_scenarios(df, num=40)
         
         print("\n[6/7] Injecting provider outliers...")
-        df = self.inject_provider_outliers(df, num=35)
+        df = self.inject_provider_outliers(df, num=50)
         
         print("\n[7/7] Injecting velocity fraud...")
-        df = self.inject_velocity_fraud(df, num=25)
+        df = self.inject_velocity_fraud(df, num=48)
         
         # Shuffle the data
         df = df.sample(frac=1, random_state=42).reset_index(drop=True)
@@ -322,5 +314,5 @@ class FraudDataGenerator:
 
 
 if __name__ == "__main__":
-    generator = FraudDataGenerator(num_rows=2500)
+    generator = FraudDataGenerator(num_rows=2600)
     df = generator.generate()

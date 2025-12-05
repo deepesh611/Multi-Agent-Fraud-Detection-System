@@ -1,8 +1,6 @@
 import sqlite3
-import numpy as np
 import pandas as pd
 from pathlib import Path
-from datetime import datetime
 
 class FraudETLPipeline:
     def __init__(self):
@@ -53,8 +51,6 @@ class FraudETLPipeline:
         
         # 5. Patient Claim Frequency
         print("  → Calculating patient claim frequencies...")
-        
-        # Sort by date for rolling calculations
         self.df = self.df.sort_values(['patient_id', 'claim_date'])
         
         # Count claims per patient in last 7 days
@@ -156,36 +152,26 @@ class FraudETLPipeline:
             procedure = row['procedure_code']
             
             # Extract prefix
-            diag_prefix = '_'.join(diagnosis.split('_')[:2])  # e.g., "D_HEART"
-            proc_prefix = procedure.split('0')[0]  # e.g., "CARD"
+            diag_prefix = '_'.join(diagnosis.split('_')[:2]) 
+            proc_prefix = procedure.split('0')[0]  
             
             # Check if valid combo
             if diag_prefix in valid_combos:
                 is_valid = proc_prefix in valid_combos[diag_prefix]
                 mismatches.append(not is_valid)
             else:
-                mismatches.append(False)  # Unknown combo, assume valid
+                mismatches.append(False)
         
         return mismatches
     
     def load(self):
         print("\n[3/3] LOAD: Saving to SQLite database...")
-        
-        # Connect to SQLite
         conn = sqlite3.connect(self.db_path)
-        
-        # Save main claims table
         self.df.to_sql('claims', conn, if_exists='replace', index=False)
         print(f"✅ Saved 'claims' table ({len(self.df)} rows)")
-        
-        # Create provider summary table
-        provider_summary = self.df.groupby(['provider_id', 'provider_specialty']).agg({
-            'claim_amount': ['mean', 'sum', 'count'],
-            'is_fraud': 'sum'
-        }).reset_index()
-        provider_summary.columns = ['provider_id', 'provider_specialty', 
-                                   'avg_claim_amount', 'total_billed', 
-                                   'total_claims', 'fraud_claims']
+
+        provider_summary = self.df.groupby(['provider_id', 'provider_specialty']).agg({ 'claim_amount': ['mean', 'sum', 'count'], 'is_fraud': 'sum' }).reset_index()
+        provider_summary.columns = ['provider_id', 'provider_specialty', 'avg_claim_amount', 'total_billed', 'total_claims', 'fraud_claims']
         provider_summary.to_sql('providers', conn, if_exists='replace', index=False)
         print(f"✅ Saved 'providers' table ({len(provider_summary)} rows)")
         

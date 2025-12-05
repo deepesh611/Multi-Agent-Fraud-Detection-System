@@ -1,9 +1,8 @@
 tqdm
-numpy
 pandas
 plotly
 openai
-streamlit
 faiss-cpu
+streamlit
 python-dotenv
 sentence-transformers

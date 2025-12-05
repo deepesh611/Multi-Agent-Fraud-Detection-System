@@ -3,20 +3,15 @@ Query Agent - RAG-Powered Fraud Q&A System
 Answers natural language questions about fraud cases using retrieval and LLM
 """
 
-import sys
 import os
+import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from rag.vector_store import FraudVectorStore
 from utils.llm_client import LLMClient
+from rag.vector_store import FraudVectorStore
 
-
-class QueryAgent:
-    """
-    RAG-powered agent that answers questions about fraud cases
-    Retrieves relevant cases and uses LLM to generate answers
-    """
-    
+# The RAG bot
+class QueryAgent:    
     def __init__(self, db_path='data/processed/fraud_detection.db'):
         self.vector_store = FraudVectorStore()
         self.vector_store.load_index()
@@ -209,9 +204,8 @@ Your answer:"""
             print("-"*60 + "\n")
 
 
-# ===========================
 # Example Questions
-# ===========================
+
 EXAMPLE_QUESTIONS = [
     "What are the most common fraud patterns?",
     "Show me claims with duplicate IDs",

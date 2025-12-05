@@ -1,25 +1,20 @@
 """
-Agent Orchestrator - Coordinates Multi-Agent Fraud Detection System
-Manages workflow between Detection, Investigation, and Explanation agents
+Agent Orchestrator: Manages workflow between Detection, Investigation, and Explanation agents
 """
 
-import sys
 import os
+import sys
+import sqlite3
+import pandas as pd
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from fraud.rules import FraudDetector
-from agents.investigation_agent import InvestigationAgent
-from agents.explanation_agent import ExplanationAgent
 from agents.query_agent import QueryAgent
-import pandas as pd
-import sqlite3
+from agents.explanation_agent import ExplanationAgent
+from agents.investigation_agent import InvestigationAgent
 
 
 class FraudDetectionOrchestrator:
-    """
-    Coordinates the multi-agent fraud detection system
-    Manages workflow: Detection → Investigation → Explanation → Query
-    """
     
     def __init__(self, db_path='data/processed/fraud_detection.db'):
         self.db_path = db_path
@@ -29,12 +24,12 @@ class FraudDetectionOrchestrator:
         self.query_agent = QueryAgent()
     
     def run_full_pipeline(self, investigate_top_n=10):
-        """
-        Execute complete fraud detection pipeline
-        1. Detection Agent: Run fraud rules
-        2. Investigation Agent: Deep analysis of top cases
-        3. Explanation Agent: Generate reports
-        """
+        
+        # Execute complete fraud detection pipeline
+        # 1. Detection Agent: Run fraud rules
+        # 2. Investigation Agent: Deep analysis of top cases
+        # 3. Explanation Agent: Generate reports
+
         print("\n" + "="*80)
         print("🚀 Multi-Agent Fraud Detection System")
         print("="*80)
@@ -83,7 +78,6 @@ class FraudDetectionOrchestrator:
     
     def investigate_single_claim(self, claim_id):
         """
-        Full agent workflow for a single claim
         Returns comprehensive fraud assessment
         """
         print(f"\n🔍 Analyzing Claim: {claim_id}\n")
@@ -163,9 +157,7 @@ class FraudDetectionOrchestrator:
         return result
 
 
-# ===========================
 # Main Execution
-# ===========================
 if __name__ == "__main__":
     print("\n🤖 Starting Multi-Agent Fraud Detection System\n")
     

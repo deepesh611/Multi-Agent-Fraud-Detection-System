@@ -1,14 +1,11 @@
 """
 Streamlit Dashboard for Multi-Agent Fraud Detection System
-Main application file
 """
 
-import streamlit as st
-import pandas as pd
-import sys
 import os
-
-# Add src to path
+import sys
+import pandas as pd
+import streamlit as st
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from ui_utils import (
@@ -369,12 +366,9 @@ with tab4:
     else:
         prompt = None
     
-    # ========================================
-    # 2-COLUMN LAYOUT
-    # ========================================
     col_chat, col_faq = st.columns([2, 1])
     
-    # LEFT COLUMN: Chat (scrollable)
+    # LEFT COLUMN: Chat
     with col_chat:
         # Display chat messages
         if len(st.session_state.messages) == 0:
@@ -384,7 +378,7 @@ with tab4:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
     
-    # RIGHT COLUMN: FAQ (sticky)
+    # RIGHT COLUMN: FAQ
     with col_faq:
         st.subheader("💡 Frequently Asked")
         
@@ -404,8 +398,8 @@ with tab4:
         
         st.markdown("---")
         st.info("💡 **Tip:** Type your own question in the input box below.")
-
-    # Chat input - this keeps it fixed at bottom
+        
+    # Chat input
     if not prompt:
         prompt = st.chat_input("Type your question here... (e.g., 'Show me high value fraud cases')")
     

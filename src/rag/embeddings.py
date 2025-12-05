@@ -1,15 +1,15 @@
 """
-Embeddings Generator for Fraud Cases
-Converts fraud case data into vector embeddings for RAG
+Embeddings Generator for Fraud Cases: Converts fraud case data into vector embeddings for RAG
 """
 
 import sqlite3
-import pandas as pd
-import numpy as np
-from sentence_transformers import SentenceTransformer
-from tqdm import tqdm
 import pickle
+import numpy as np
+import pandas as pd
+
+from tqdm import tqdm
 from pathlib import Path
+from sentence_transformers import SentenceTransformer
 
 
 class FraudEmbeddingsGenerator:
@@ -24,14 +24,9 @@ class FraudEmbeddingsGenerator:
         self.embeddings_path = 'data/embeddings'
         Path(self.embeddings_path).mkdir(parents=True, exist_ok=True)
     
-    def create_fraud_documents(self):
-        """
-        Create text documents from fraud cases for embedding
-        Each document contains: claim details + fraud flags + context
-        """
+    # Create documents from fraud cases
+    def create_fraud_documents(self):               
         conn = sqlite3.connect(self.db_path)
-        
-        # Join claims with fraud flags
         query = """
             SELECT 
                 c.claim_id,
@@ -55,16 +50,13 @@ class FraudEmbeddingsGenerator:
         
         print(f"✅ Loaded {len(df)} claims")
         
-        # Create text documents
         documents = []
         metadata = []
         
         for idx, row in tqdm(df.iterrows(), total=len(df), desc="Creating documents"):
-            # Create rich text representation
             doc_text = self._create_document_text(row)
             documents.append(doc_text)
             
-            # Store metadata
             metadata.append({
                 'claim_id': row['claim_id'],
                 'fraud_detected': row['fraud_detected'],

@@ -3,15 +3,12 @@ Utility functions for the Streamlit Dashboard
 Handles data loading, caching, and chart generation
 """
 
+import os
+import sys
 import sqlite3
 import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
 import streamlit as st
-import sys
-import os
-
-# Add src to path so we can import our modules
+import plotly.express as px
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from orchestrator import FraudDetectionOrchestrator
@@ -25,8 +22,6 @@ def get_orchestrator():
 def load_data():
     """Load claims and fraud data from database"""
     conn = sqlite3.connect('data/processed/fraud_detection.db')
-    
-    # Load claims joined with fraud flags
     query = """
         SELECT 
             c.*,
@@ -42,7 +37,6 @@ def load_data():
     conn.close()
     
     # Remove duplicate claim_ids (keep first occurrence)
-    # This fixes the fraud count discrepancy caused by duplicate rows in the claims table
     df = df.drop_duplicates(subset=['claim_id'], keep='first')
     
     # Convert dates
@@ -69,13 +63,11 @@ def create_fraud_metrics(df):
         'fraud_rate': fraud_rate
     }
 
+# Plot fraud vs legitimate claims over time with weekly aggregation
 def plot_fraud_trend(df):
-    """Plot fraud vs legitimate claims over time with weekly aggregation"""
-    # Use weekly ('W') instead of daily ('D') for smoother visualization
     weekly_counts = df.groupby([pd.Grouper(key='claim_date', freq='W'), 'fraud_detected']).size().reset_index(name='count')
     weekly_counts['Type'] = weekly_counts['fraud_detected'].map({0: 'Legitimate', 1: 'Fraud'})
     
-    # Use line chart with markers for clarity
     fig = px.line(weekly_counts, x='claim_date', y='count', color='Type',
                   title='Weekly Claim Volume: Fraud vs Legitimate',
                   color_discrete_map={'Legitimate': '#00CC96', 'Fraud': '#EF553B'},
@@ -90,11 +82,10 @@ def plot_fraud_trend(df):
     )
     return fig
 
+
+# Plot breakdown of fraud rules triggered
 def plot_fraud_by_rule(df):
-    """Plot breakdown of fraud rules triggered"""
     fraud_df = df[df['fraud_detected'] == 1].copy()
-    
-    # Split rules (comma separated) and explode
     all_rules = []
     for rules in fraud_df['rules_triggered'].dropna():
         all_rules.extend([r.strip() for r in rules.split(',')])
@@ -109,8 +100,8 @@ def plot_fraud_by_rule(df):
     fig.update_layout(yaxis={'categoryorder':'total ascending'})
     return fig
 
+# Plot distribution of claim amounts
 def plot_amount_distribution(df):
-    """Plot distribution of claim amounts"""
     fig = px.histogram(df, x='claim_amount', color='fraud_detected',
                        title='Claim Amount Distribution',
                        nbins=50, log_y=True,

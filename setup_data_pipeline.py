@@ -1,13 +1,9 @@
 """
-Complete Data Pipeline Setup Script
-Runs: Data Generation → ETL → Fraud Detection → Embeddings
+Complete Data Pipeline Setup Script: Data Generation → ETL → Fraud Detection → Embeddings
 """
 
-import os
 import sys
 import time
-
-# Add src to path
 sys.path.append('src')
 
 def print_step(step_num, step_name):
@@ -27,7 +23,6 @@ def main():
     print("=" * 80)
     
     input("\nPress ENTER to start the pipeline...")
-    
     start_time = time.time()
     
     # ============================================================================

@@ -1,12 +1,11 @@
 """
-Fraud Detection Rules Engine
-Implements 6 fraud detection rules for insurance claims
+Fraud Detection Rules Engine: Implements 6 fraud detection rules
 """
 
 import sqlite3
 import pandas as pd
-import numpy as np
-from typing import Tuple, List, Dict
+
+from typing import Tuple
 
 
 class FraudDetector:
@@ -92,15 +91,10 @@ class FraudDetector:
                 'actual_fraud': row['is_fraud']  # For validation
             })
         
-        # Create results dataframe
+        # Create results dataframe and save
         results_df = pd.DataFrame(results)
-        
-        # Print summary
         self._print_summary(results_df)
-        
-        # Save results
         self._save_results(results_df)
-        
         return results_df
     
     # ===========================
@@ -116,8 +110,7 @@ class FraudDetector:
     # RULE 2: Amount Anomalies
     # ===========================
     def rule_amount_anomaly(self, row) -> Tuple[bool, str]:
-        """Detect abnormally high claim amounts using Z-score"""
-        # Z-score > 3 means more than 3 standard deviations from mean
+        # Detect abnormally high claim amounts using Z-score
         if abs(row['amount_zscore']) > 3:
             return True, f"Amount ${row['claim_amount']:,.2f} is {abs(row['amount_zscore']):.1f}σ from specialty average"
         
@@ -127,25 +120,22 @@ class FraudDetector:
         
         return False, ""
     
-    # ===========================
-    # RULE 3: Code Mismatches
-    # ===========================
+    # ================================
+    # RULE 3: Procedure Code Mismatch
+    # ================================
     def rule_code_mismatch(self, row) -> Tuple[bool, str]:
-        """Detect procedure codes that don't match diagnosis"""
         if row['is_code_mismatch']:
             return True, f"Procedure {row['procedure_code']} doesn't match diagnosis {row['diagnosis_code']}"
         return False, ""
     
     # ===========================
     # RULE 4: Velocity Fraud
+    # Detect multiple claims in short time period
     # ===========================
     def rule_velocity_fraud(self, row) -> Tuple[bool, str]:
-        """Detect multiple claims in short time period"""
-        # 5+ claims in 7 days is suspicious
         if row['patient_claims_7d'] >= 5:
             return True, f"Patient has {row['patient_claims_7d']} claims in past 7 days"
         
-        # 10+ claims in 30 days is also suspicious
         if row['patient_claims_30d'] >= 10:
             return True, f"Patient has {row['patient_claims_30d']} claims in past 30 days"
         
@@ -153,9 +143,9 @@ class FraudDetector:
     
     # ===========================
     # RULE 5: Provider Outliers
+    # Detect providers billing significantly more than peers
     # ===========================
     def rule_provider_outlier(self, row) -> Tuple[bool, str]:
-        """Detect providers billing significantly more than peers"""
         if row['is_provider_outlier']:
             provider_avg = row['provider_avg_amount']
             specialty_avg = row['specialty_avg_amount']
@@ -165,9 +155,9 @@ class FraudDetector:
     
     # ===========================
     # RULE 6: Impossible Scenarios
+    # Detect physically impossible scenarios
     # ===========================
     def rule_impossible_scenario(self, row) -> Tuple[bool, str]:
-        """Detect physically impossible scenarios"""
         # Same-day surgeries
         if row['same_day_surgeries']:
             return True, f"Patient has {row['same_day_claim_count']} surgeries on same day"
@@ -240,7 +230,7 @@ if __name__ == "__main__":
     detector.load_data()
     results = detector.run_all_rules()
     
-    # Show some examples
+    # Examples
     print("\n" + "="*60)
     print("📋 Sample Fraud Cases Detected:")
     print("="*60)
